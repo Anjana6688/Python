@@ -1,1 +1,33 @@
 yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+ name: cleanup
+spec:
+ steps:
+   - name: remove-temp-files
+     image: alpine:latest
+     script: |
+       #!/bin/sh
+       echo "Cleaning up temporary files"
+       rm -rf /workspace/*/temp
+       echo "Cleanup completed"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+ name: test
+spec:
+ params:
+   - name: test-command
+     type: string
+     default: "nose"
+ steps:
+   - name: run-tests
+     image: python:3.9-slim
+     script: |
+       #!/bin/sh
+       echo "Installing dependencies"
+       pip install nose
+       echo "Running tests with $(params.test-command)"
+       nosetests -v
